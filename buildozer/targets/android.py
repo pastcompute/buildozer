@@ -450,6 +450,7 @@ class TargetAndroid(Target):
         cmd = self.buildozer.cmd
         self.pa_dir = pa_dir = join(self.buildozer.platform_dir,
                                     'python-for-android')
+        source = self.buildozer.config.getdefault('app', 'android.branch', 'old_toolchain')
         if not self.buildozer.file_exists(pa_dir):
             system_p4a_dir = self.buildozer.config.getdefault(
                 'app', 'android.p4a_dir')
@@ -457,16 +458,16 @@ class TargetAndroid(Target):
                 cmd('ln -sf {} ./python-for-android'.format(system_p4a_dir),
                     cwd=self.buildozer.platform_dir)
             else:
-                cmd('git clone -b old_toolchain --single-branch '
-                    'https://github.com/kivy/python-for-android.git',
+                cmd('git clone -b {branch} --single-branch '
+                    'https://github.com/kivy/python-for-android.git'.format(
+                        branch=source),
                     cwd=self.buildozer.platform_dir)
         elif self.platform_update:
             cmd('git clean -dxf', cwd=pa_dir)
-            cmd('git pull origin master', cwd=pa_dir)
+            cmd('git pull origin {branch}'.format(branch=source), cwd=pa_dir)
 
-        source = self.buildozer.config.getdefault('app', 'android.branch')
         if source:
-            cmd('git checkout  %s' % (source), cwd=pa_dir)
+            cmd('git checkout {branch}'.format(branch=source), cwd=pa_dir)
 
         self._install_apache_ant()
         self._install_android_sdk()
